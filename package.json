@@ -1,0 +1,32 @@
+{
+  "name": "100-rebuild",
+  "version": "1.0.0",
+  "description": "About",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magentaqin/100-rebuild.git"
+  },
+  "keywords": [
+    "rebuild"
+  ],
+  "author": "qinmu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/magentaqin/100-rebuild/issues"
+  },
+  "homepage": "https://github.com/magentaqin/100-rebuild#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "eslint-config-tencent": "^1.0.2",
+    "husky": "^2.6.0",
+    "lint-staged": "^10.5.4",
+    "nodemon": "^2.0.13",
+    "ts-node": "^10.3.0",
+    "typescript": "^4.3.5"
+  }
+}
