@@ -1,16 +1,19 @@
 <template>
   <div id="app">
-    <large-list />
+    <batch-render-list />
+    <!-- <large-list /> -->
   </div>
 </template>
 
 <script>
-import LargeList from './components/LargeList.vue'
+// import LargeList from './components/LargeList.vue'
+import BatchRenderList from './components/BatchRenderList.vue'
 
 export default {
   name: 'App',
   components: {
-    LargeList
+    BatchRenderList
+    // LargeList
   }
 }
 </script>
