@@ -1,18 +1,21 @@
 <template>
   <div id="app">
-    <batch-render-list />
+    <!-- <batch-render-list /> -->
     <!-- <large-list /> -->
+    <raf-list />
   </div>
 </template>
 
 <script>
 // import LargeList from './components/LargeList.vue'
-import BatchRenderList from './components/BatchRenderList.vue'
+// import BatchRenderList from './components/BatchRenderList.vue'
+import RAFList from './components/RAFList.vue'
 
 export default {
   name: 'App',
   components: {
-    BatchRenderList
+    RafList: RAFList,
+    // BatchRenderList
     // LargeList
   }
 }
