@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>DocumentFragment + RequestAnimationFrame</title>
+</head>
+
+<body>
+  <ul id="container"></ul>
+</body>
+
+<script>
+  let count = 1;
+  const start = Date.now()
+  let ul = document.getElementById('container')
+  function loop() {
+    if (count > 100000000) {
+      return;
+    }
+    this.updateList(count)
+    setTimeout(() => {
+      loop();
+    }, 10)
+  }
+  function updateList(start) {
+    const fragment = document.createDocumentFragment()
+    for (let i = start; i < start + 20; i++) {
+      let li = document.createElement('li')
+      li.innerText = i;
+      fragment.appendChild(li) 
+      // ul.appendChild(li)
+    }
+    ul.appendChild(fragment)
+    count += 20
+  }
+  loop() 
+</script>
+</html>
