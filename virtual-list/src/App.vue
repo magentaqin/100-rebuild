@@ -1,25 +1,30 @@
 <template>
   <div id="app">
-    <simple-virtual-scroller :list-data="listData" />
+    <!-- <simple-virtual-scroller :list-data="simpleListData" /> -->
+    <simple-dynamic-scroller :list-data="dynamicListData" />
   </div>
 </template>
 
 <script>
 import SimpleVirtualScroller from './components/SimpleVirtualScroller.vue'
+import SimpleDynamicScroller from './components/SimpleDynmaicScroller.vue'
 
 export default {
   name: 'App',
   components: {
-    SimpleVirtualScroller
+    // SimpleVirtualScroller
+    SimpleDynamicScroller
   },
   data() {
     return {
-      listData: []
+      // simpleListData: []
+      dynamicListData: []
     }
   },
   mounted() {
     for (let i = 0; i < 100; i++) {
-      this.listData.push(i)
+      // this.simpleListData.push(i)
+      this.dynamicListData.push({ id: i, value: i })
     }
   }
 }

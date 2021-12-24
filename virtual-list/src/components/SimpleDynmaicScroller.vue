@@ -7,12 +7,13 @@
     <div class="phantom-list" :style="{height: listHeight + 'px'}"></div>
     <div class="visible-list" :style="{ position: 'absolute', top: visibleListTransform }">
       <div
+        ref="items"
         class="visible-list-item"
         v-for="(item, index) in visibleData"
         :key="index"
         :style="{ height: itemSize + 'px', lineHeight: itemSize + 'px' }"
        >
-        {{ item }}
+        {{ item.value }}
       </div>
     </div>
   </div>
@@ -73,6 +74,19 @@ export default {
   mounted() {
     this.endIndex = this.startIndex + this.visibleCount - 1;
     this.initPositionInfo();
+  },
+  // 渲染完成后，用每项的实际渲染信息来更新positionInfo
+  updated() {
+    const nodes = this.$refs.items;
+    nodes.forEach((node) => {
+      const rect = node.getBoundingClientRect()
+      const height = rect.height
+      const index = node.id;
+      const oldHeight = this.positionInfo[index].height
+      if (height !== oldHeight) {
+        
+      }
+    })
   },
   methods: {
     // scroll回调
