@@ -9,8 +9,8 @@
       <div
         ref="items"
         class="visible-list-item"
-        v-for="(item, index) in visibleData"
-        :key="index"
+        v-for="(item) in visibleData"
+        :key="item.id"
         :style="{ height: itemSize + 'px', lineHeight: itemSize + 'px' }"
        >
         {{ item.value }}
@@ -75,18 +75,9 @@ export default {
     this.endIndex = this.startIndex + this.visibleCount - 1;
     this.initPositionInfo();
   },
-  // 渲染完成后，用每项的实际渲染信息来更新positionInfo
   updated() {
-    const nodes = this.$refs.items;
-    nodes.forEach((node) => {
-      const rect = node.getBoundingClientRect()
-      const height = rect.height
-      const index = node.id;
-      const oldHeight = this.positionInfo[index].height
-      if (height !== oldHeight) {
-        
-      }
-    })
+    // 渲染完成后，用每项的实际渲染信息来更新positionInfo
+    this.updatePositionInfo()
   },
   methods: {
     // scroll回调
@@ -106,6 +97,28 @@ export default {
           bottom: (index + 1) * this.minSize
         }
       }))
+    },
+    // 渲染完成后，用每项的实际渲染信息来更新positionInfo
+    updatePositionInfo() {
+      const nodes = this.$refs.items;
+      nodes.forEach((node) => {
+        const rect = node.getBoundingClientRect()
+        const height = rect.height
+        const index = node.id;
+        const oldHeight = this.positionInfo[index].height
+        // 预估的高度和实际渲染高度不一致
+        if (height !== oldHeight) {
+          const diffVal = height - oldHeight;
+          // 当前node的bottom和height重新赋值
+          this.positionInfo[index].bottom = this.positionInfo[index].bottom + diffVal;
+          this.positionInfo[index].height = height;
+          // 接下来的node的top和bottom也重新赋值
+          for (let k = index + 1; k < this.positionInfo.length; k++) {
+            this.positionInfo[k].top = this.positionInfo[k].bottom;
+            this.positionInfo[k].bottom = this.positionInfo[k].bottom + diffVal
+          }
+        }
+      })
     }
   }
 }
