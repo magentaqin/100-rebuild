@@ -4,14 +4,13 @@
     class="simple-dynamic-virtual-scroller-container" 
     @scroll="handleScroll"
   >
-    <div class="phantom-list" :style="{height: listHeight + 'px'}"></div>
-    <div class="visible-list" :style="{ position: 'absolute', top: visibleListTransform }">
+    <div class="phantom-list"></div>
+    <div ref="content" class="visible-list">
       <div
         ref="items"
         class="visible-list-item"
         v-for="(item) in visibleData"
         :key="item.id"
-        :style="{ height: itemSize + 'px', lineHeight: itemSize + 'px' }"
        >
         {{ item.value }}
       </div>
@@ -28,16 +27,16 @@ export default {
       type:Array,
       default:() => []
     },
-    // 每项高度
-    itemSize: {
-      type: Number,
-      default: 100
-    },
-    // 预估最小高度
-    minSize: {
+    // 预估高度
+    estimatedItemSize: {
       type: Number,
       default: 0
-    }
+    },
+    // 缓冲区比例
+    bufferPercentage: {
+      type: Number,
+      default: 0
+    },
   },
   data() {
     return {
@@ -54,47 +53,49 @@ export default {
     };
   },
   computed:{
-    // 列表的总高度：最后一项位置信息的bottom
-    listHeight() {
-      return this.positionInfo[this.positionInfo.length - 1].bottom;
-    },
     // 可视区域需要展示的 item 数量
     visibleCount() {
-      return Math.ceil(this.screenHeight / this.itemSize)
+      return Math.ceil(this.screenHeight / this.estimatedItemSize)
+    },
+    // 可视区域上方渲染条数
+    aboveCount() {
+      const bufferCount = Math.floor(this.bufferPercentage * this.visibleCount)
+      // 考虑到startIndex比bufferCount小的情况
+      return Math.min(this.startIndex, bufferCount);
+    },
+    // 可视区域下方渲染条数
+    belowCount() {
+      const bufferCount = Math.floor(this.bufferPercentage * this.visibleCount)
+      const lastIndex = this.listData.length - 1
+      // 考虑到endIndex快到底的情况
+      return Math.min(lastIndex - this.endIndex, bufferCount)
     },
     // 获取可视区域内列表数据
     visibleData(){
-      return this.listData.slice(this.startIndex, this.endIndex + 1);
+      const start = this.startIndex - this.aboveCount;
+      const end = this.endIndex + this.belowCount;
+      return this.listData.slice(start, end - 1);
     },
-    // 可视区域垂直移动偏移量
-    visibleListTransform() {
-      return `${this.startOffset}px`;
-    }
+  },
+  created() {
+    this.initPositionInfo();
   },
   mounted() {
     this.endIndex = this.startIndex + this.visibleCount - 1;
-    this.initPositionInfo();
   },
   updated() {
     // 渲染完成后，用每项的实际渲染信息来更新positionInfo
     this.updatePositionInfo()
   },
   methods: {
-    // scroll回调
-    handleScroll() {
-      const scrollTop = this.$refs.scroller.scrollTop;
-      this.startIndex = Math.floor(scrollTop / this.itemSize)
-      this.endIndex = this.startIndex + this.visibleCount - 1
-      this.startOffset = scrollTop - (scrollTop % this.itemSize)
-    },
     // 初始化positionInfo
     initPositionInfo() {
       this.positionInfo = this.listData.map(((item, index) => {
         return {
           index,
-          height: this.minSize,
-          top: index * this.minSize,
-          bottom: (index + 1) * this.minSize
+          height: this.estimatedItemSize,
+          top: index * this.estimatedItemSize,
+          bottom: (index + 1) * this.estimatedItemSize
         }
       }))
     },
@@ -119,6 +120,31 @@ export default {
           }
         }
       })
+    },
+     // scroll回调
+    handleScroll() {
+      const scrollTop = this.$refs.scroller.scrollTop;
+      this.startIndex = this.getStartIndex(scrollTop)
+      this.endIndex = this.startIndex + this.visibleCount - 1
+      this.startOffset = scrollTop - (scrollTop % this.itemSize)
+    },
+    // 获取开始索引
+    getStartIndex(scrollTop = 0) {
+      const item = this.positionInfo.find(item => item.bottom > scrollTop)
+      return item.index;
+    },
+    // 设置当前的偏移量
+    setStartOffset() {
+      let startOffset = 0;
+      if (this.startIndex > 0) {
+        const startTop = this.positionInfo[this.startIndex].top
+        let size = startTop
+        // 上方缓冲区第一个item
+        const aboveFirstItem = this.positionInfo[this.startIndex - this.aboveCount]
+        if (aboveFirstItem) {
+
+        }
+      }
     }
   }
 }
