@@ -84,8 +84,10 @@ export default {
     this.endIndex = this.startIndex + this.visibleCount - 1;
   },
   updated() {
-    // 渲染完成后，用每项的实际渲染信息来更新positionInfo
-    this.updatePositionInfo()
+    this.$nextTick(() => {
+       // 渲染完成后，用每项的实际渲染信息来更新positionInfo
+       this.updatePositionInfo()
+    })
   },
   methods: {
     // 初始化positionInfo
@@ -142,9 +144,11 @@ export default {
         // 上方缓冲区第一个item
         const aboveFirstItem = this.positionInfo[this.startIndex - this.aboveCount]
         if (aboveFirstItem) {
-
+          size = startTop - aboveFirstItem.top
         }
+        startOffset = startTop - size
       }
+      this.$refs.content.style.transform = `translate(0,${startOffset}px)`
     }
   }
 }
