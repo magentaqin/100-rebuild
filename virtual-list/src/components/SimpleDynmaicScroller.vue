@@ -4,15 +4,16 @@
     class="simple-dynamic-virtual-scroller-container" 
     @scroll="handleScroll"
   >
-    <div class="phantom-list"></div>
+    <div ref="phantom" class="phantom-list"></div>
     <div ref="content" class="visible-list">
       <div
         ref="items"
         class="visible-list-item"
         v-for="(item) in visibleData"
+        :id="item.id"
         :key="item.id"
        >
-        {{ item.value }}
+        <span>{{ item.id }}: <span>{{ item.value }}</span></span>
       </div>
     </div>
   </div>
@@ -30,12 +31,12 @@ export default {
     // 预估高度
     estimatedItemSize: {
       type: Number,
-      default: 0
+      default: 100
     },
     // 缓冲区比例
     bufferPercentage: {
       type: Number,
-      default: 0
+      default: 1
     },
   },
   data() {
@@ -73,8 +74,10 @@ export default {
     // 获取可视区域内列表数据
     visibleData(){
       const start = this.startIndex - this.aboveCount;
-      const end = this.endIndex + this.belowCount;
-      return this.listData.slice(start, end - 1);
+      let end = this.endIndex + this.belowCount;
+      const lastIndex = this.listData.length - 1
+      end = Math.min(lastIndex, end);
+      return this.listData.slice(start, end + 1);
     },
   },
   created() {
@@ -85,8 +88,18 @@ export default {
   },
   updated() {
     this.$nextTick(() => {
-       // 渲染完成后，用每项的实际渲染信息来更新positionInfo
-       this.updatePositionInfo()
+      if(!this.$refs.items || !this.$refs.items.length){
+        return ;
+      }
+      // 渲染完成后，用每项的实际渲染信息来更新positionInfo
+      this.updatePositionInfo()
+      // 更新列表总高度
+      if (this.positionInfo[this.positionInfo.length-1]) {
+        const height = this.positionInfo[this.positionInfo.length-1].bottom
+        this.$refs.phantom.style.height = height + 'px'
+      }
+      // 设置偏移量
+      this.setStartOffset();
     })
   },
   methods: {
@@ -107,7 +120,7 @@ export default {
       nodes.forEach((node) => {
         const rect = node.getBoundingClientRect()
         const height = rect.height
-        const index = node.id;
+        const index = Number(node.id)
         const oldHeight = this.positionInfo[index].height
         // 预估的高度和实际渲染高度不一致
         if (height !== oldHeight) {
@@ -128,12 +141,38 @@ export default {
       const scrollTop = this.$refs.scroller.scrollTop;
       this.startIndex = this.getStartIndex(scrollTop)
       this.endIndex = this.startIndex + this.visibleCount - 1
-      this.startOffset = scrollTop - (scrollTop % this.itemSize)
+      this.setStartOffset();
     },
     // 获取开始索引
-    getStartIndex(scrollTop = 0) {
-      const item = this.positionInfo.find(item => item.bottom > scrollTop)
-      return item.index;
+    // getStartIndex(scrollTop = 0) {
+    //   const item = this.positionInfo.find(item => item.bottom > scrollTop)
+    //   return item.index;
+    // },
+    //获取列表起始索引
+    getStartIndex(scrollTop = 0){
+      //二分法查找
+      return this.binarySearch(this.positionInfo,scrollTop)
+    },
+    binarySearch(list,value){
+      let start = 0;
+      let end = list.length - 1;
+      let tempIndex = null;
+
+      while(start <= end){
+        let midIndex = parseInt((start + end)/2);
+        let midValue = list[midIndex].bottom;
+        if(midValue === value){
+          return midIndex + 1;
+        }else if(midValue < value){
+          start = midIndex + 1;
+        }else if(midValue > value){
+          if(tempIndex === null || tempIndex > midIndex){
+            tempIndex = midIndex;
+          }
+          end = end - 1;
+        }
+      }
+      return tempIndex;
     },
     // 设置当前的偏移量
     setStartOffset() {
@@ -159,7 +198,13 @@ export default {
   height: 100vh;
   position: relative;
   overflow-y: auto;
+  overflow-x: hidden;
 }
+.phantom-list {
+  position: absolute;
+  top: 0;
+}
+
 .visible-list-item {
   width: 100vw;
   border-bottom: 1px solid #333;

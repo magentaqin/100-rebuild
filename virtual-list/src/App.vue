@@ -1,13 +1,17 @@
 <template>
   <div id="app">
     <!-- <simple-virtual-scroller :list-data="simpleListData" /> -->
-    <simple-dynamic-scroller :list-data="dynamicListData" />
+    <simple-dynamic-scroller
+       v-if="dynamicListData.length" 
+      :list-data="dynamicListData" 
+    />
   </div>
 </template>
 
 <script>
-import SimpleVirtualScroller from './components/SimpleVirtualScroller.vue'
+// import SimpleVirtualScroller from './components/SimpleVirtualScroller.vue'
 import SimpleDynamicScroller from './components/SimpleDynmaicScroller.vue'
+import faker from 'faker';
 
 export default {
   name: 'App',
@@ -24,7 +28,7 @@ export default {
   mounted() {
     for (let i = 0; i < 100; i++) {
       // this.simpleListData.push(i)
-      this.dynamicListData.push({ id: i, value: i })
+      this.dynamicListData.push({ id: i, value: faker.lorem.sentences() })
     }
   }
 }
